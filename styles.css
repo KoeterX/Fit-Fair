@@ -136,6 +136,50 @@ body {
     z-index: 1;
 }
 
+.hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    color: var(--white);
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--white);
+}
+
+.center-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.center-label {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
@@ -264,47 +308,156 @@ body {
     background: var(--white);
 }
 
-.about-grid {
+.about-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+}
+
+.about-main {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.about-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+}
+
+.about-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 2.5rem;
+}
+
+.about-features {
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
 }
 
-.about-card {
-    background: var(--white);
-    padding: 2.5rem;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(46, 204, 113, 0.1);
+.feature-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: start;
 }
 
-.about-card:hover {
-    transform: translateY(-10px);
-    box-shadow: var(--shadow-hover);
-}
-
-.card-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
+.feature-icon {
+    width: 60px;
+    height: 60px;
     background: var(--gradient);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
-.card-title {
-    font-size: 1.5rem;
+.feature-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.feature-text {
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.visual-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.stat-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--gradient);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.stat-circle:hover {
+    transform: scale(1.1);
+}
+
+.stat-percentage {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-desc {
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.about-values {
+    margin-top: 2rem;
+}
+
+.values-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.value-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+}
+
+.value-number {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 3rem;
+    font-weight: 700;
+    color: rgba(46, 204, 113, 0.1);
+}
+
+.value-title {
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--dark-color);
     margin-bottom: 1rem;
 }
 
-.card-text {
+.value-text {
     color: var(--text-color);
     line-height: 1.6;
 }
@@ -635,6 +788,11 @@ body {
         font-size: 2.5rem;
     }
     
+    .hero-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
     .hero-buttons {
         justify-content: center;
         flex-wrap: wrap;
@@ -643,6 +801,20 @@ body {
     .visual-element {
         width: 250px;
         height: 250px;
+    }
+    
+    .about-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .visual-stats {
+        flex-direction: row;
+        justify-content: center;
+    }
+    
+    .values-grid {
+        grid-template-columns: 1fr;
     }
     
     .contact-grid {
