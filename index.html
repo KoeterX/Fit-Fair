@@ -3,501 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fit & Fair - Sportvereniging</title>
+    <title>Knorrie Porrie - Live Video Chat & VIP Content</title>
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK v9.6.1 Compatibility Mode -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo-section">
-                    <div class="logo-circle">
-                        <span class="logo-text">FF</span>
-                    </div>
-                    <h1 class="site-title">Fit & Fair</h1>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>🐷 Knorrie Porrie</h1>
                 </div>
-                <nav class="main-nav">
-                    <ul class="nav-list">
-                        <li><a href="#home" class="nav-link">Home</a></li>
-                        <li><a href="#about" class="nav-link">Over Ons</a></li>
-                        <li><a href="#sports" class="nav-link">Sporten</a></li>
-                        <li><a href="#schedule" class="nav-link">Schema</a></li>
-                        <li><a href="#contact" class="nav-link">Contact</a></li>
-                    </ul>
-                </nav>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#livechat">Live Chat</a></li>
+                    <li><a href="#vip">VIP Content</a></li>
+                    <li><a href="#inschrijven">Inschrijven</a></li>
+                    <li><a href="#abonnementen">Abonnementen</a></li>
+                    <li><a href="#leden">Leden</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
-        </div>
+        </nav>
     </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-pattern"></div>
-        <div class="container">
+    <main>
+        <section id="home" class="hero">
             <div class="hero-content">
-                <div class="hero-text">
-                    <h2 class="hero-title">Transformeer Je Leven</h2>
-                    <p class="hero-subtitle">Waar fitness passie en community samenkomen voor buitengewone resultaten</p>
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Actieve Leden</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">15</span>
-                            <span class="stat-label">Expert Trainers</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">8</span>
-                            <span class="stat-label">Unieke Sporten</span>
-                        </div>
-                    </div>
-                    <div class="hero-buttons">
-                        <a href="#sports" class="btn btn-primary">Start Je Reis</a>
-                        <a href="#contact" class="btn btn-secondary">Gratis Proefles</a>
-                    </div>
+                <div class="hero-left">
+                    <h1>Welkom bij Knorrie Porrie</h1>
+                    <p>Live video chat en exclusieve VIP content</p>
+                    <a href="#livechat" class="cta-button">Start Live Chat</a>
                 </div>
-                <div class="hero-visual">
-                    <div class="visual-element">
-                        <div class="circle circle-1"></div>
-                        <div class="circle circle-2"></div>
-                        <div class="circle circle-3"></div>
-                        <div class="center-text">
-                            <span class="center-icon">⚡</span>
-                            <span class="center-label">FIT</span>
-                        </div>
-                    </div>
+                <div class="hero-right">
+                    <div class="hero-logo">🐷</div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Over Fit & Fair</h2>
-                <p class="section-subtitle">Waar fitness passie en community samenkomen</p>
-            </div>
-            <div class="about-content">
-                <div class="about-main">
-                    <div class="about-text">
-                        <h3 class="about-title">Onze Missie</h3>
-                        <p class="about-description">
-                            Bij Fit & Fair geloven we dat fitness meer is dan alleen sporten. Het's een levensstijl, 
-                            een community, en een weg naar persoonlijke groei. Onze moderne faciliteiten en 
-                            gepassioneerde trainers creëren een omgeving waar iedereen kan bloeien, 
-                            van beginner tot atleet.
-                        </p>
-                        <div class="about-features">
-                            <div class="feature-item">
-                                <span class="feature-icon">🔥</span>
-                                <div class="feature-content">
-                                    <h4 class="feature-title">High-Intensity Training</h4>
-                                    <p class="feature-text">Moderne trainingsmethoden voor maximale resultaten</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <span class="feature-icon">🧘</span>
-                                <div class="feature-content">
-                                    <h4 class="feature-title">Mind-Body Balance</h4>
-                                    <p class="feature-text">Holistische aanpak voor totale welzijn</p>
-                                </div>
-                            </div>
-                            <div class="feature-item">
-                                <span class="feature-icon">👥</span>
-                                <div class="feature-content">
-                                    <h4 class="feature-title">Community Driven</h4>
-                                    <p class="feature-text">Samen sterker in een ondersteunende omgeving</p>
-                                </div>
-                            </div>
-                        </div>
+        <section id="livechat" class="section">
+            <div class="container">
+                <h2>Live Video Chat</h2>
+                <div class="activities-grid">
+                    <div class="activity-card">
+                        <div class="activity-icon">🎥</div>
+                        <h3>Live Chat</h3>
+                        <p>Directe video verbinding met andere leden</p>
                     </div>
-                    <div class="about-visual">
-                        <div class="visual-stats">
-                            <div class="stat-circle">
-                                <span class="stat-percentage">95%</span>
-                                <span class="stat-desc">Leden bereiken doelen</span>
-                            </div>
-                            <div class="stat-circle">
-                                <span class="stat-percentage">4.9</span>
-                                <span class="stat-desc">Gemiddelde rating</span>
-                            </div>
-                            <div class="stat-circle">
-                                <span class="stat-percentage">7</span>
-                                <span class="stat-desc">Dagen per week open</span>
-                            </div>
-                        </div>
+                    <div class="activity-card">
+                        <div class="activity-icon">👥</div>
+                        <h3>Group Chat</h3>
+                        <p>Chat met meerdere mensen tegelijk</p>
                     </div>
-                </div>
-                <div class="about-values">
-                    <h3 class="values-title">Onze Waarden</h3>
-                    <div class="values-grid">
-                        <div class="value-card">
-                            <div class="value-number">01</div>
-                            <h4 class="value-title">Passie</h4>
-                            <p class="value-text">Wij leven voor fitness en delen die energie met elke lid</p>
-                        </div>
-                        <div class="value-card">
-                            <div class="value-number">02</div>
-                            <h4 class="value-title">Innovatie</h4>
-                            <p class="value-text">Altijd op zoek naar nieuwste methoden en technologie</p>
-                        </div>
-                        <div class="value-card">
-                            <div class="value-number">03</div>
-                            <h4 class="value-title">Resultaten</h4>
-                            <p class="value-text">Wij meten succes aan jouw persoonlijke prestaties</p>
-                        </div>
-                        <div class="value-card">
-                            <div class="value-number">04</div>
-                            <h4 class="value-title">Community</h4>
-                            <p class="value-text">Samen groeien we sterker en verder</p>
-                        </div>
+                    <div class="activity-card">
+                        <div class="activity-icon">�</div>
+                        <h3>Live Shows</h3>
+                        <p>Kijk naar exclusieve live optredens</p>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-icon">💬</div>
+                        <h3>Text Chat</h3>
+                        <p>Directe tekstberichten sturen</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Sports Section -->
-    <section id="sports" class="sports">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Onze Sporten</h2>
-                <p class="section-subtitle">Kies jouw favoriete sport en start je avontuur</p>
-            </div>
-            <div class="sports-grid">
-                <div class="sport-card">
-                    <div class="sport-header">
-                        <div class="sport-icon">⚡</div>
-                        <h3 class="sport-name">Speed Training</h3>
+        <section id="vip" class="section alt-bg">
+            <div class="container">
+                <h2>VIP Content</h2>
+                <div class="training-schedule">
+                    <div class="training-day">
+                        <h3>Exclusieve Video's</h3>
+                        <ul>
+                            <li>🎬 Premium content</li>
+                            <li>📺 HD kwaliteit</li>
+                            <li>🔓 Onbeperkte toegang</li>
+                        </ul>
                     </div>
-                    <div class="sport-info">
-                        <p class="sport-description">Explosieve trainingen voor snelheid en kracht</p>
-                        <div class="sport-details">
-                            <span class="detail-item">📅 Dinsdag & Donderdag</span>
-                            <span class="detail-item">⏰ 18:00 - 19:30</span>
-                        </div>
+                    <div class="training-day">
+                        <h3>Speciale Features</h3>
+                        <ul>
+                            <li>🎯 Personalisatie</li>
+                            <li>📱 Mobile toegang</li>
+                            <li>🔄 Dagelijkse updates</li>
+                        </ul>
                     </div>
-                </div>
-                <div class="sport-card">
-                    <div class="sport-header">
-                        <div class="sport-icon">🧘</div>
-                        <h3 class="sport-name">Yoga & Mindfulness</h3>
-                    </div>
-                    <div class="sport-info">
-                        <p class="sport-description">Balans tussen body en mind voor totale welzijn</p>
-                        <div class="sport-details">
-                            <span class="detail-item">📅 Maandag & Woensdag</span>
-                            <span class="detail-item">⏰ 19:00 - 20:00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="sport-card">
-                    <div class="sport-header">
-                        <div class="sport-icon">🏃</div>
-                        <h3 class="sport-name">Running Club</h3>
-                    </div>
-                    <div class="sport-info">
-                        <p class="sport-description">Loopgroepen voor beginners en ervaren lopers</p>
-                        <div class="sport-details">
-                            <span class="detail-item">📅 Zaterdag</span>
-                            <span class="detail-item">⏰ 09:00 - 10:30</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="sport-card">
-                    <div class="sport-header">
-                        <div class="sport-icon">💪</div>
-                        <h3 class="sport-name">Strength & Conditioning</h3>
-                    </div>
-                    <div class="sport-info">
-                        <p class="sport-description">Krachttraining met professionele begeleiding</p>
-                        <div class="sport-details">
-                            <span class="detail-item">📅 Dinsdag & Vrijdag</span>
-                            <span class="detail-item">⏰ 20:00 - 21:30</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="sport-card">
-                    <div class="sport-header">
-                        <div class="sport-icon">🤸</div>
-                        <h3 class="sport-name">Functional Fitness</h3>
-                    </div>
-                    <div class="sport-info">
-                        <p class="sport-description">Alledaagse bewegingen voor functionele kracht</p>
-                        <div class="sport-details">
-                            <span class="detail-item">📅 Woensdag & Zondag</span>
-                            <span class="detail-item">⏰ 10:00 - 11:30</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="sport-card">
-                    <div class="sport-header">
-                        <div class="sport-icon">🎯</div>
-                        <h3 class="sport-name">Personal Training</h3>
-                    </div>
-                    <div class="sport-info">
-                        <p class="sport-description">1-op-1 begeleiding voor persoonlijke doelen</p>
-                        <div class="sport-details">
-                            <span class="detail-item">📅 Op afspraak</span>
-                            <span class="detail-item">⏰ Flexibele tijden</span>
-                        </div>
+                    <div class="training-day">
+                        <h3>Leden Voordeel</h3>
+                        <ul>
+                            <li>⭐ VIP status</li>
+                            <li>🎁 Exclusieve bonussen</li>
+                            <li>👑 Prioriteit support</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Schedule Section -->
-    <section id="schedule" class="schedule">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Weekschema</h2>
-                <p class="section-subtitle">Onze trainingstijden en beschikbaarheid</p>
-            </div>
-            <div class="schedule-grid">
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Maandag</h3>
-                        <span class="day-date">Begin van de week</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">09:00 - 10:00</span>
-                            <span class="activity">Yoga & Mindfulness</span>
+        <section id="abonnementen" class="section">
+            <div class="container">
+                <h2>Abonnementen</h2>
+                <div class="tournaments">
+                    <div class="tournament-card">
+                        <div class="tournament-date">
+                            <span class="day">€9</span>
+                            <span class="month">/maand</span>
                         </div>
-                        <div class="schedule-item">
-                            <span class="time">18:00 - 19:00</span>
-                            <span class="activity">Open Gym</span>
-                        </div>
-                        <div class="schedule-item">
-                            <span class="time">19:00 - 20:00</span>
-                            <span class="activity">Yoga & Mindfulness</span>
+                        <div class="tournament-info">
+                            <h3>Basic</h3>
+                            <p>Live chat en basis content</p>
+                            <span class="tournament-type">Basic</span>
                         </div>
                     </div>
-                </div>
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Dinsdag</h3>
-                        <span class="day-date">Power day</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">18:00 - 19:30</span>
-                            <span class="activity">Speed Training</span>
+                    <div class="tournament-card">
+                        <div class="tournament-date">
+                            <span class="day">€19</span>
+                            <span class="month">/maand</span>
                         </div>
-                        <div class="schedule-item">
-                            <span class="time">20:00 - 21:30</span>
-                            <span class="activity">Strength & Conditioning</span>
+                        <div class="tournament-info">
+                            <h3>Premium</h3>
+                            <p>Alle features + VIP content</p>
+                            <span class="tournament-type">Premium</span>
                         </div>
                     </div>
-                </div>
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Woensdag</h3>
-                        <span class="day-date">Balance day</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">19:00 - 20:00</span>
-                            <span class="activity">Yoga & Mindfulness</span>
+                    <div class="tournament-card">
+                        <div class="tournament-date">
+                            <span class="day">€29</span>
+                            <span class="month">/maand</span>
                         </div>
-                        <div class="schedule-item">
-                            <span class="time">20:00 - 21:00</span>
-                            <span class="activity">Functional Fitness</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Donderdag</h3>
-                        <span class="day-date">Speed day</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">18:00 - 19:30</span>
-                            <span class="activity">Speed Training</span>
-                        </div>
-                        <div class="schedule-item">
-                            <span class="time">20:00 - 21:00</span>
-                            <span class="activity">Open Gym</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Vrijdag</h3>
-                        <span class="day-date">Strength day</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">18:00 - 19:00</span>
-                            <span class="activity">Open Gym</span>
-                        </div>
-                        <div class="schedule-item">
-                            <span class="time">20:00 - 21:30</span>
-                            <span class="activity">Strength & Conditioning</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Zaterdag</h3>
-                        <span class="day-date">Community day</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">09:00 - 10:30</span>
-                            <span class="activity">Running Club</span>
-                        </div>
-                        <div class="schedule-item">
-                            <span class="time">10:00 - 11:30</span>
-                            <span class="activity">Functional Fitness</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="day-card">
-                    <div class="day-header">
-                        <h3 class="day-name">Zondag</h3>
-                        <span class="day-date">Recovery day</span>
-                    </div>
-                    <div class="day-schedule">
-                        <div class="schedule-item">
-                            <span class="time">10:00 - 11:30</span>
-                            <span class="activity">Functional Fitness</span>
-                        </div>
-                        <div class="schedule-item">
-                            <span class="time">14:00 - 16:00</span>
-                            <span class="activity">Family Sports Hour</span>
+                        <div class="tournament-info">
+                            <h3>VIP</h3>
+                            <p>Exclusieve toegang tot alles</p>
+                            <span class="tournament-type">VIP</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Neem Contact Op</h2>
-                <p class="section-subtitle">Word lid van de Fit & Fair community</p>
-            </div>
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <span class="icon">📍</span>
-                        </div>
-                        <div class="info-content">
-                            <h3 class="info-title">Locatie</h3>
-                            <p class="info-text">Fit & Fair Center<br>Athletic Boulevard 567<br>1234 AB Sportstad</p>
-                        </div>
+        <section id="inschrijven" class="section alt-bg">
+            <div class="container">
+                <h2>Schrijf je in</h2>
+                <div class="open-days">
+                    <div class="open-day-card">
+                        <h3>Gratis Proefperiode</h3>
+                        <p>7 dagen gratis toegang!</p>
+                        <ul>
+                            <li>🎥 Live chat toegang</li>
+                            <li>📱 Mobile app</li>
+                            <li>💬 Directe support</li>
+                        </ul>
+                        <button class="register-btn">Start Gratis</button>
                     </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <span class="icon">📞</span>
-                        </div>
-                        <div class="info-content">
-                            <h3 class="info-title">Contact</h3>
-                            <p class="info-text">Telefoon: 088-1234567<br>Email: info@fitfair-center.nl<br>Website: www.fitfair-center.nl</p>
-                        </div>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <span class="icon">⏰</span>
-                        </div>
-                        <div class="info-content">
-                            <h3 class="info-title">Openingstijden</h3>
-                            <p class="info-text">Maandag - Donderdag: 06:00 - 23:00<br>Vrijdag: 06:00 - 22:00<br>Zaterdag: 07:00 - 20:00<br>Zondag: 08:00 - 18:00</p>
-                        </div>
+                    <div class="open-day-card">
+                        <h3>VIP Upgrade</h3>
+                        <p>Directe VIP toegang</h3>
+                        <ul>
+                            <li>⭐ Exclusieve content</li>
+                            <li>👑 Prioriteit support</li>
+                            <li>🎁 Speciale bonussen</li>
+                        </ul>
+                        <button class="register-btn">Word VIP</button>
                     </div>
                 </div>
-                <div class="contact-form">
-                    <form class="form">
+            </div>
+        </section>
+
+        <section id="registratie" class="section">
+            <div class="container">
+                <h2>Registratie Formulier</h2>
+                <div class="registration-form">
+                    <form id="registrationForm">
                         <div class="form-group">
-                            <label for="name" class="form-label">Naam</label>
-                            <input type="text" id="name" name="name" class="form-input" required>
+                            <label for="username">Gebruikersnaam *</label>
+                            <input type="text" id="username" name="username" required>
                         </div>
                         <div class="form-group">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" id="email" name="email" class="form-input" required>
+                            <label for="email">E-mail *</label>
+                            <input type="email" id="email" name="email" required>
                         </div>
                         <div class="form-group">
-                            <label for="phone" class="form-label">Telefoon</label>
-                            <input type="tel" id="phone" name="phone" class="form-input">
+                            <label for="password">Wachtwoord *</label>
+                            <input type="password" id="password" name="password" required>
                         </div>
                         <div class="form-group">
-                            <label for="sport" class="form-label">Interesse in</label>
-                            <select id="sport" name="sport" class="form-select">
-                                <option value="">Kies een sport</option>
-                                <option value="speed">Speed Training</option>
-                                <option value="yoga">Yoga & Mindfulness</option>
-                                <option value="running">Running Club</option>
-                                <option value="strength">Strength & Conditioning</option>
-                                <option value="functional">Functional Fitness</option>
-                                <option value="personal">Personal Training</option>
+                            <label for="subscription">Abonnement *</label>
+                            <select id="subscription" name="subscription" required>
+                                <option value="">Kies abonnement</option>
+                                <option value="basic">Basic - €9/maand</option>
+                                <option value="premium">Premium - €19/maand</option>
+                                <option value="vip">VIP - €29/maand</option>
+                                <option value="trial">Gratis proefperiode</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="message" class="form-label">Bericht</label>
-                            <textarea id="message" name="message" class="form-textarea" rows="4"></textarea>
+                            <label for="age">Leeftijd *</label>
+                            <select id="age" name="age" required>
+                                <option value="">Kies leeftijd</option>
+                                <option value="18-25">18-25 jaar</option>
+                                <option value="26-35">26-35 jaar</option>
+                                <option value="36-45">36-45 jaar</option>
+                                <option value="46+">46+ jaar</option>
+                            </select>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-full">Verstuur Bericht</button>
+                        <div class="form-group">
+                            <label for="message">Bericht</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Vertel ons iets over jezelf..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Account Aanmaken</button>
                     </form>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
-    <footer class="footer">
+        <section id="leden" class="section alt-bg">
+            <div class="container">
+                <h2>Leden Overzicht</h2>
+                <div class="participants-overview">
+                    <div class="participant-stats">
+                        <div class="stat-card">
+                            <h3>Totaal Leden</h3>
+                            <span class="stat-number">1,247</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Online Nu</h3>
+                            <span class="stat-number">389</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Nieuwe Leden</h3>
+                            <span class="stat-number">123</span>
+                        </div>
+                    </div>
+                    <div class="participants-list">
+                        <h3>Recent Online</h3>
+                        <div class="participant-item">
+                            <span class="participant-name">🟢 User123</span>
+                            <span class="participant-activity">VIP</span>
+                            <span class="participant-date">Nu online</span>
+                        </div>
+                        <div class="participant-item">
+                            <span class="participant-name">🟢 StarGazer</span>
+                            <span class="participant-activity">Premium</span>
+                            <span class="participant-date">2 min geleden</span>
+                        </div>
+                        <div class="participant-item">
+                            <span class="participant-name">🟢 NightOwl</span>
+                            <span class="participant-activity">Basic</span>
+                            <span class="participant-date">5 min geleden</span>
+                        </div>
+                        <div class="participant-item">
+                            <span class="participant-name">🟡 Dreamer</span>
+                            <span class="participant-activity">VIP</span>
+                            <span class="participant-date">1 uur geleden</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <div class="footer-logo">
-                        <div class="logo-circle">
-                            <span class="logo-text">FF</span>
-                        </div>
-                        <h3 class="footer-title">Fit & Fair</h3>
-                    </div>
-                    <p class="footer-description">Sportvereniging voor iedereen die wil groeien, presteren en genieten van sport.</p>
+                    <h3>Knorrie Porrie</h3>
+                    <p>Live video chat platform</p>
+                    <p>24/7 Beschikbaar<br>
+                    Wereldwijde toegang<br>
+                    Premium content</p>
                 </div>
                 <div class="footer-section">
-                    <h4 class="footer-heading">Snelle Links</h4>
-                    <ul class="footer-links">
-                        <li><a href="#home" class="footer-link">Home</a></li>
-                        <li><a href="#about" class="footer-link">Over Ons</a></li>
-                        <li><a href="#sports" class="footer-link">Sporten</a></li>
-                        <li><a href="#schedule" class="footer-link">Schema</a></li>
-                        <li><a href="#contact" class="footer-link">Contact</a></li>
-                    </ul>
+                    <h3>Contact</h3>
+                    <p>Support: 24/7 Online</p>
+                    <p>E-mail: support@knorrieporrie.nl</p>
+                    <p>Website: www.knorrieporrie.nl</p>
                 </div>
                 <div class="footer-section">
-                    <h4 class="footer-heading">Sporten</h4>
-                    <ul class="footer-links">
-                        <li><a href="#" class="footer-link">Speed Training</a></li>
-                        <li><a href="#" class="footer-link">Yoga & Mindfulness</a></li>
-                        <li><a href="#" class="footer-link">Running Club</a></li>
-                        <li><a href="#" class="footer-link">Strength & Conditioning</a></li>
-                        <li><a href="#" class="footer-link">Functional Fitness</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4 class="footer-heading">Contact</h4>
-                    <ul class="footer-links">
-                        <li><a href="tel:088-1234567" class="footer-link">088-1234567</a></li>
-                        <li><a href="mailto:info@fitfair-center.nl" class="footer-link">info@fitfair-center.nl</a></li>
-                        <li><a href="#" class="footer-link">Athletic Boulevard 567</a></li>
-                        <li><a href="#" class="footer-link">1234 AB Sportstad</a></li>
-                    </ul>
+                    <h3>Features</h3>
+                    <p>Live Video Chat</p>
+                    <p>VIP Content</p>
+                    <p>Mobile App</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Fit & Fair. Alle rechten voorbehouden.</p>
+                <p>&copy; 2024 Knorrie Porrie. Alle rechten voorbehouden.</p>
             </div>
         </div>
     </footer>
+
+    <script src="firebase-config.js"></script>
+    <script src="firebase-database.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
