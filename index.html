@@ -230,45 +230,33 @@
 
         <section id="leden" class="section alt-bg">
             <div class="container">
-                <h2>Leden Overzicht</h2>
-                <div class="participants-overview">
-                    <div class="participant-stats">
-                        <div class="stat-card">
-                            <h3>Totaal Leden</h3>
-                            <span class="stat-number">1,247</span>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Online Nu</h3>
-                            <span class="stat-number">389</span>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Nieuwe Leden</h3>
-                            <span class="stat-number">123</span>
-                        </div>
+                <h2 class="section-title">Leden Overzicht</h2>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Totaal Leden</h3>
+                        <p class="stat-number">0</p>
                     </div>
-                    <div class="participants-list">
-                        <h3>Recent Online</h3>
-                        <div class="participant-item">
-                            <span class="participant-name">🟢 User123</span>
-                            <span class="participant-activity">VIP</span>
-                            <span class="participant-date">Nu online</span>
-                        </div>
-                        <div class="participant-item">
-                            <span class="participant-name">🟢 StarGazer</span>
-                            <span class="participant-activity">Premium</span>
-                            <span class="participant-date">2 min geleden</span>
-                        </div>
-                        <div class="participant-item">
-                            <span class="participant-name">🟢 NightOwl</span>
-                            <span class="participant-activity">Basic</span>
-                            <span class="participant-date">5 min geleden</span>
-                        </div>
-                        <div class="participant-item">
-                            <span class="participant-name">🟡 Dreamer</span>
-                            <span class="participant-activity">VIP</span>
-                            <span class="participant-date">1 uur geleden</span>
-                        </div>
+                    <div class="stat-card">
+                        <h3>Online Nu <span id="onlineCount">(0)</span></h3>
+                        <p class="stat-number">0</p>
                     </div>
+                    <div class="stat-card">
+                        <h3>VIP Leden</h3>
+                        <p class="stat-number">0</p>
+                    </div>
+                </div>
+                <div class="online-users-section">
+                    <h3>Online Gebruikers</h3>
+                    <div class="user-controls">
+                        <button onclick="changeUsername()" class="btn btn-primary">Wijzig Username</button>
+                        <button onclick="if(socket) socket.emit('get-online-users')" class="btn btn-secondary">Vernieuw Lijst</button>
+                    </div>
+                    <div id="onlineUsersList" class="online-users-list">
+                        <p style="color: #999;">Laden...</p>
+                    </div>
+                </div>
+                <div class="participants-list">
+                    <!-- Dynamische content -->
                 </div>
             </div>
         </section>
