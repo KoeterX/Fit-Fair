@@ -256,6 +256,12 @@ async function submitRegistration(data) {
                 // Mark user as registered
                 localStorage.setItem('knorrie_user_registered', 'true');
                 
+                // Update username on server if socket is connected
+                if (socket && data.username) {
+                    socket.emit('update-username', data.username);
+                    console.log('Sent username to server:', data.username);
+                }
+                
                 // Statistics will be updated automatically via real-time listener
             } else {
                 showNotification(result.message, 'error');
@@ -286,6 +292,12 @@ async function submitRegistration(data) {
             
             // Mark user as registered
             localStorage.setItem('knorrie_user_registered', 'true');
+            
+            // Update username on server if socket is connected
+            if (socket && newRegistration.username) {
+                socket.emit('update-username', newRegistration.username);
+                console.log('Sent username to server (localStorage):', newRegistration.username);
+            }
             
             updateStatistics();
         }, 1500);
@@ -570,11 +582,13 @@ function handleChatSelection(chatType) {
 }
 
 function openVideoChatWindow() {
+    const myUsername = currentUsername || 'Guest';
+    
     createChatModal('Random Video Chat', `
         <div class="video-chat-container">
             <div class="video-grid">
                 <div class="video-item">
-                    <h4>Jij</h4>
+                    <h4>${myUsername}</h4>
                     <video id="localVideo" autoplay muted playsinline style="width: 100%; height: 240px; border-radius: 10px; background: #000; object-fit: cover;"></video>
                 </div>
                 <div class="video-item">
@@ -802,18 +816,31 @@ function initializeSocket() {
         currentUserId = data.userId;
         currentUsername = data.username;
         console.log('Received user info:', data);
+        
+        // Update online users display immediately
+        setTimeout(() => {
+            updateOnlineUsersDisplay();
+        }, 500);
     });
     
     // Handle online users count
     socket.on('online-users-count', (count) => {
         onlineUsersCount = count;
         updateOnlineUsersDisplay();
+        console.log('Online users count updated:', count);
     });
     
     // Handle username change
     socket.on('username-changed', (newUsername) => {
         currentUsername = newUsername;
         showNotification(`Username gewijzigd naar: ${newUsername}`, 'success');
+    });
+    
+    // Handle username updated from registration
+    socket.on('username-updated', (newUsername) => {
+        currentUsername = newUsername;
+        console.log('Username updated from registration:', newUsername);
+        showNotification(`Welkom ${newUsername}!`, 'success');
     });
     
     // Handle group chat messages
@@ -841,7 +868,7 @@ function initializeSocket() {
     // Handle partner found
     socket.on('partner-found', async (data) => {
         connectedUserId = data.partnerId;
-        connectedUsername = data.partnerUsername;
+        connectedUsername = data.partnerUsername || 'User_' + data.partnerId.substr(5, 4);
         isSearching = false;
         
         const statusElement = document.getElementById('videoStatus');
@@ -860,6 +887,7 @@ function initializeSocket() {
         
         remoteUserLabel.textContent = connectedUsername;
         showNotification(`Verbonden met ${connectedUsername}!`, 'success');
+        addSystemMessage('Verbonden met ' + connectedUsername);
     });
     
     // Handle WebRTC signaling
@@ -1188,16 +1216,41 @@ function addSystemMessage(message) {
 
 // Update online users display
 function updateOnlineUsersDisplay() {
+    console.log('Updating online users display with count:', onlineUsersCount);
+    
+    // Update header count
     const onlineCountElement = document.getElementById('onlineCount');
     if (onlineCountElement) {
         onlineCountElement.textContent = onlineUsersCount;
+        console.log('Updated onlineCount element to:', onlineUsersCount);
     }
     
-    // Update in leden section
-    const ledenCountElement = document.querySelector('.stat-number');
-    if (ledenCountElement) {
-        ledenCountElement.textContent = onlineUsersCount;
-    }
+    // Update in leden section - find the "Online Nu" stat card
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        const title = card.querySelector('h3');
+        if (title && title.textContent.includes('Online Nu')) {
+            const numberElement = card.querySelector('.stat-number');
+            if (numberElement) {
+                numberElement.textContent = onlineUsersCount;
+                console.log('Updated Online Nu stat to:', onlineUsersCount);
+            }
+        }
+    });
+    
+    // Also update total members (demo: online + 50)
+    const totalCards = document.querySelectorAll('.stat-card');
+    totalCards.forEach((card, index) => {
+        const title = card.querySelector('h3');
+        if (title && title.textContent.includes('Totaal Leden')) {
+            const numberElement = card.querySelector('.stat-number');
+            if (numberElement) {
+                const totalMembers = onlineUsersCount + 50; // Demo: base 50 + online users
+                numberElement.textContent = totalMembers;
+                console.log('Updated total members to:', totalMembers);
+            }
+        }
+    });
 }
 
 // Add group chat message

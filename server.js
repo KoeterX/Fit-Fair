@@ -31,10 +31,10 @@ io.on('connection', (socket) => {
     const userId = 'user_' + Math.random().toString(36).substr(2, 9);
     socket.userId = userId;
     
-    // Add to online users
+    // Add to online users with default username (will be updated after registration)
     onlineUsers.set(userId, {
         socket: socket,
-        username: `User_${userId.substr(5, 4)}`,
+        username: `Guest_${userId.substr(5, 4)}`,
         joinedAt: new Date()
     });
     
@@ -229,15 +229,33 @@ io.on('connection', (socket) => {
         }
     });
     
-    // Handle username change
+    // Handle username change (from registration)
+    socket.on('update-username', (newUsername) => {
+        if (newUsername && newUsername.trim().length > 0 && newUsername.length <= 20) {
+            const userInfo = onlineUsers.get(userId);
+            if (userInfo) {
+                userInfo.username = newUsername.trim();
+                
+                // Broadcast username change
+                socket.emit('username-updated', newUsername);
+                io.emit('online-users-count', onlineUsers.size);
+                
+                console.log(`Username updated for ${userId}: ${newUsername}`);
+            }
+        }
+    });
+    
+    // Handle manual username change
     socket.on('change-username', (newUsername) => {
         if (newUsername && newUsername.trim().length > 0 && newUsername.length <= 20) {
             const userInfo = onlineUsers.get(userId);
-            userInfo.username = newUsername.trim();
-            
-            // Broadcast username change
-            socket.emit('username-changed', newUsername);
-            io.emit('online-users-count', onlineUsers.size);
+            if (userInfo) {
+                userInfo.username = newUsername.trim();
+                
+                // Broadcast username change
+                socket.emit('username-changed', newUsername);
+                io.emit('online-users-count', onlineUsers.size);
+            }
         }
     });
     
