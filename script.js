@@ -651,6 +651,14 @@ function openGroupChatWindow() {
         </div>
     `);
     
+    // Focus on input after modal opens
+    setTimeout(() => {
+        const input = document.getElementById('groupChatInput');
+        if (input) {
+            input.focus();
+        }
+    }, 500);
+    
     // Request online users list when opening
     if (socket) {
         socket.emit('get-online-users');
@@ -910,6 +918,7 @@ function initializeSocket() {
     
     // Handle private chat messages
     socket.on('private-chat-message', (message) => {
+        console.log('Received private message from', message.fromUsername, ':', message.message);
         addPrivateChatMessage(message.fromUsername, message.message, false);
     });
     
@@ -1410,31 +1419,57 @@ function updateOnlineUsersList(users) {
         return;
     }
     
-    users.forEach(user => {
-        // Don't show current user in the list
-        if (user.userId === currentUserId) return;
-        
+    // Filter out current user
+    const otherUsers = users.filter(user => user.userId !== currentUserId);
+    
+    if (otherUsers.length === 0) {
+        usersListElement.innerHTML = '<p style="color: #999; text-align: center;">Je bent de enige online</p>';
+        return;
+    }
+    
+    otherUsers.forEach(user => {
         const userDiv = document.createElement('div');
         userDiv.style.cssText = `
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 5px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
             background: #333;
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         `;
         
         userDiv.innerHTML = `
-            <span>${user.username}</span>
-            <button onclick="startPrivateChat('${user.userId}', '${user.username}')" style="background: #ff6b35; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Chat</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 8px; height: 8px; background: #4CAF50; border-radius: 50%;"></div>
+                <span style="font-weight: bold;">${user.username}</span>
+            </div>
+            <button onclick="event.stopPropagation(); startPrivateChat('${user.userId}', '${user.username}')" style="background: #ff6b35; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Chat</button>
         `;
+        
+        // Add hover effect
+        userDiv.addEventListener('mouseenter', () => {
+            userDiv.style.background = '#444';
+            userDiv.style.transform = 'translateX(5px)';
+        });
+        
+        userDiv.addEventListener('mouseleave', () => {
+            userDiv.style.background = '#333';
+            userDiv.style.transform = 'translateX(0)';
+        });
+        
+        // Click anywhere on user div to start chat
+        userDiv.addEventListener('click', () => {
+            startPrivateChat(user.userId, user.username);
+        });
         
         usersListElement.appendChild(userDiv);
     });
     
-    console.log('Updated online users list with', users.length, 'users');
+    console.log('Updated online users list with', otherUsers.length, 'other users');
 }
 
 // Start private chat
@@ -1445,11 +1480,19 @@ function startPrivateChat(targetUserId, targetUsername) {
                 <div style="color: #999; text-align: center;">Private chat met ${targetUsername}</div>
             </div>
             <div class="chat-input" style="display: flex; gap: 10px; margin-top: 10px;">
-                <input type="text" id="privateChatInput" data-target-userid="${targetUserId}" placeholder="Typ een bericht..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
+                <input type="text" id="privateChatInput" data-target-userid="${targetUserId}" placeholder="Typ een bericht naar ${targetUsername}..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
                 <button onclick="sendPrivateMessage('${targetUserId}')" style="background: #ff6b35; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Verstuur</button>
             </div>
         </div>
     `);
+    
+    // Focus on input after modal opens
+    setTimeout(() => {
+        const input = document.getElementById('privateChatInput');
+        if (input) {
+            input.focus();
+        }
+    }, 500);
 }
 
 // Send private message

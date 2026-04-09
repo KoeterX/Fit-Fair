@@ -187,6 +187,8 @@ io.on('connection', (socket) => {
     // Handle group chat messages
     socket.on('group-chat-message', (message) => {
         const userInfo = onlineUsers.get(userId);
+        if (!userInfo) return;
+        
         const chatMessage = {
             id: Date.now(),
             message: message,
@@ -194,6 +196,8 @@ io.on('connection', (socket) => {
             fromUsername: userInfo.username,
             timestamp: new Date()
         };
+        
+        console.log('Group chat message from', userInfo.username, ':', message);
         
         // Add to history
         groupChatMessages.push(chatMessage);
@@ -203,8 +207,9 @@ io.on('connection', (socket) => {
             groupChatMessages.shift();
         }
         
-        // Broadcast to all online users
+        // Broadcast to ALL online users
         io.emit('group-chat-message', chatMessage);
+        console.log('Broadcasted group chat message to', onlineUsers.size, 'users');
     });
     
     // Handle private chat messages
