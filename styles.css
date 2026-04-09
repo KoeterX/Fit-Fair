@@ -566,6 +566,123 @@ footer {
     color: #999;
 }
 
+/* Online Users Section */
+.online-users-section {
+    margin-top: 40px;
+    padding: 30px;
+    background: #1a1a1a;
+    border-radius: 15px;
+    border: 2px solid #ff6b35;
+}
+
+.online-users-section h3 {
+    color: #ff6b35;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.user-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.online-users-list {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #000;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.online-users-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.online-users-list::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+}
+
+.online-users-list::-webkit-scrollbar-thumb {
+    background: #ff6b35;
+    border-radius: 4px;
+}
+
+/* Chat Header */
+.chat-header {
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 10px;
+}
+
+.chat-header h4 {
+    color: #ff6b35;
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+}
+
+.chat-header p {
+    color: #999;
+    margin: 0;
+    font-size: 0.9em;
+}
+
+/* Video Grid */
+.video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.video-item {
+    text-align: center;
+}
+
+.video-item h4 {
+    color: #ff6b35;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+/* Skip Button */
+.skip-btn {
+    background: #ff6b35 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    transition: all 0.3s ease !important;
+}
+
+.skip-btn:hover:not(:disabled) {
+    background: #ff8555 !important;
+    transform: scale(1.05);
+}
+
+.skip-btn:disabled {
+    background: #666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+/* Chat Messages Container */
+.chat-messages-container {
+    margin-top: 20px;
+}
+
+.chat-messages {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hamburger {
