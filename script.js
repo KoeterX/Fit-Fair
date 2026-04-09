@@ -570,17 +570,21 @@ function openVideoChatWindow() {
     createChatModal('Video Chat', `
         <div class="video-chat-container">
             <div class="video-placeholder">
-                <div class="camera-icon">📹</div>
-                <p>Video chat wordt gestart...</p>
-                <div class="loading-spinner"></div>
+                <video id="localVideo" autoplay muted playsinline style="width: 100%; max-width: 640px; height: auto; border-radius: 10px; background: #000;"></video>
+                <div id="videoStatus" style="color: #ff6b35; margin-top: 10px;">Camera wordt gestart...</div>
             </div>
             <div class="chat-controls">
-                <button class="chat-btn" onclick="toggleCamera()">📷 Camera</button>
-                <button class="chat-btn" onclick="toggleMicrophone()">🎤 Microfoon</button>
-                <button class="chat-btn end-call" onclick="endCall()">📞 Beëindigen</button>
+                <button class="chat-btn" id="cameraBtn" onclick="toggleCamera()"> Camera AAN</button>
+                <button class="chat-btn" id="micBtn" onclick="toggleMicrophone()"> Microfoon AAN</button>
+                <button class="chat-btn end-call" onclick="endCall()"> Beëindigen</button>
             </div>
         </div>
     `);
+    
+    // Start camera when modal opens
+    setTimeout(() => {
+        startVideoChat();
+    }, 500);
 }
 
 function openGroupChatWindow() {
@@ -739,18 +743,144 @@ function handleSubscriptionSelection(plan) {
     }, 500);
 }
 
-// Mock functions for chat controls
+// WebRTC Video Chat Variables
+let localStream = null;
+let cameraEnabled = false;
+let microphoneEnabled = false;
+
+// Start video chat with WebRTC
+async function startVideoChat() {
+    const videoElement = document.getElementById('localVideo');
+    const statusElement = document.getElementById('videoStatus');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const micBtn = document.getElementById('micBtn');
+    
+    if (!videoElement) return;
+    
+    try {
+        statusElement.textContent = 'Toegang tot camera en microfoon wordt gevraagd...';
+        
+        // Request camera and microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: 'user'
+            }, 
+            audio: true 
+        });
+        
+        localStream = stream;
+        videoElement.srcObject = stream;
+        
+        cameraEnabled = true;
+        microphoneEnabled = true;
+        
+        // Update button states
+        cameraBtn.textContent = 'Camera UIT';
+        cameraBtn.style.background = '#ff6b35';
+        micBtn.textContent = 'Microfoon UIT';
+        micBtn.style.background = '#ff6b35';
+        
+        statusElement.textContent = 'Camera en microfoon actief!';
+        statusElement.style.color = '#4CAF50';
+        
+        showNotification('Video chat gestart!', 'success');
+        
+        // Handle stream end
+        stream.getVideoTracks()[0].onended = () => {
+            statusElement.textContent = 'Camera uitgeschakeld';
+            statusElement.style.color = '#ff6b35';
+        };
+        
+    } catch (error) {
+        console.error('Error accessing media devices:', error);
+        statusElement.textContent = 'Geen toegang tot camera/microfoon';
+        statusElement.style.color = '#f44336';
+        
+        if (error.name === 'NotAllowedError') {
+            showNotification('Geef toegang tot camera en microfoon in je browser', 'error');
+        } else if (error.name === 'NotFoundError') {
+            showNotification('Geen camera of microfoon gevonden', 'error');
+        } else {
+            showNotification('Fout bij starten van video chat', 'error');
+        }
+        
+        // Update button states to show disabled
+        cameraBtn.textContent = 'Camera NIET BESCHIKBAAR';
+        cameraBtn.style.background = '#666';
+        micBtn.textContent = 'Microfoon NIET BESCHIKBAAR';
+        micBtn.style.background = '#666';
+    }
+}
+
+// Toggle camera on/off
 function toggleCamera() {
-    showNotification('Camera aan/uit', 'info');
+    if (!localStream) {
+        showNotification('Start eerst de video chat', 'info');
+        return;
+    }
+    
+    const videoTrack = localStream.getVideoTracks()[0];
+    const cameraBtn = document.getElementById('cameraBtn');
+    
+    if (videoTrack) {
+        cameraEnabled = !cameraEnabled;
+        videoTrack.enabled = cameraEnabled;
+        
+        if (cameraEnabled) {
+            cameraBtn.textContent = 'Camera UIT';
+            cameraBtn.style.background = '#ff6b35';
+            showNotification('Camera ingeschakeld', 'info');
+        } else {
+            cameraBtn.textContent = 'Camera AAN';
+            cameraBtn.style.background = '#666';
+            showNotification('Camera uitgeschakeld', 'info');
+        }
+    }
 }
 
+// Toggle microphone on/off
 function toggleMicrophone() {
-    showNotification('Microfoon aan/uit', 'info');
+    if (!localStream) {
+        showNotification('Start eerst de video chat', 'info');
+        return;
+    }
+    
+    const audioTrack = localStream.getAudioTracks()[0];
+    const micBtn = document.getElementById('micBtn');
+    
+    if (audioTrack) {
+        microphoneEnabled = !microphoneEnabled;
+        audioTrack.enabled = microphoneEnabled;
+        
+        if (microphoneEnabled) {
+            micBtn.textContent = 'Microfoon UIT';
+            micBtn.style.background = '#ff6b35';
+            showNotification('Microfoon ingeschakeld', 'info');
+        } else {
+            micBtn.textContent = 'Microfoon AAN';
+            micBtn.style.background = '#666';
+            showNotification('Microfoon uitgeschakeld', 'info');
+        }
+    }
 }
 
+// End video call
 function endCall() {
+    if (localStream) {
+        // Stop all tracks
+        localStream.getTracks().forEach(track => {
+            track.stop();
+        });
+        
+        localStream = null;
+        cameraEnabled = false;
+        microphoneEnabled = false;
+    }
+    
     closeChatModal();
-    showNotification('Gesprek beëindigd', 'info');
+    showNotification('Video chat beëindigd', 'info');
 }
 
 function sendGroupMessage() {
