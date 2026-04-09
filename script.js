@@ -255,11 +255,15 @@ async function submitRegistration(data) {
                 
                 // Mark user as registered
                 localStorage.setItem('knorrie_user_registered', 'true');
+                localStorage.setItem('knorrie_username', data.username);
                 
                 // Update username on server if socket is connected
                 if (socket && data.username) {
                     socket.emit('update-username', data.username);
                     console.log('Sent username to server:', data.username);
+                } else {
+                    // Store for later when socket connects
+                    window.pendingUsername = data.username;
                 }
                 
                 // Statistics will be updated automatically via real-time listener
@@ -292,11 +296,15 @@ async function submitRegistration(data) {
             
             // Mark user as registered
             localStorage.setItem('knorrie_user_registered', 'true');
+            localStorage.setItem('knorrie_username', newRegistration.username);
             
             // Update username on server if socket is connected
             if (socket && newRegistration.username) {
                 socket.emit('update-username', newRegistration.username);
                 console.log('Sent username to server (localStorage):', newRegistration.username);
+            } else {
+                // Store for later when socket connects
+                window.pendingUsername = newRegistration.username;
             }
             
             updateStatistics();
@@ -544,9 +552,10 @@ function initializeVideoChat() {
 function handleChatSelection(chatType) {
     // Check if user is registered
     const isRegistered = localStorage.getItem('knorrie_user_registered');
+    const savedUsername = localStorage.getItem('knorrie_username');
     
-    if (!isRegistered) {
-        showNotification('Je moet eerst een account aanmaken om te chatten!', 'error');
+    if (!isRegistered || !savedUsername) {
+        showNotification('Je moet eerst een account aanmaken met een username om te chatten!', 'error');
         
         // Scroll to registration form
         const registrationSection = document.getElementById('registratie');
@@ -561,6 +570,10 @@ function handleChatSelection(chatType) {
             return;
         }
     }
+    
+    // Update current username from localStorage
+    currentUsername = savedUsername;
+    console.log('Using username from localStorage:', currentUsername);
     
     // Open chat based on type
     switch(chatType) {
@@ -802,7 +815,20 @@ let onlineUsersCount = 0;
 const configuration = {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        }
     ]
 };
 
@@ -814,13 +840,38 @@ function initializeSocket() {
     // Receive user info
     socket.on('user-info', (data) => {
         currentUserId = data.userId;
-        currentUsername = data.username;
+        
+        // Try to restore username from localStorage first
+        const savedUsername = localStorage.getItem('knorrie_username');
+        if (savedUsername) {
+            currentUsername = savedUsername;
+            // Update server with saved username
+            socket.emit('update-username', savedUsername);
+            console.log('Restored username from localStorage:', savedUsername);
+        } else {
+            currentUsername = data.username;
+        }
+        
         console.log('Received user info:', data);
         
         // Update online users display immediately
         setTimeout(() => {
             updateOnlineUsersDisplay();
         }, 500);
+    });
+    
+    // Handle connection
+    socket.on('connect', () => {
+        console.log('Connected to server');
+        
+        // Send pending username if exists
+        if (window.pendingUsername) {
+            socket.emit('update-username', window.pendingUsername);
+            currentUsername = window.pendingUsername;
+            localStorage.setItem('knorrie_username', window.pendingUsername);
+            window.pendingUsername = null;
+            console.log('Sent pending username:', currentUsername);
+        }
     });
     
     // Handle online users count
@@ -989,6 +1040,32 @@ async function createPeerConnection(isInitiator) {
         peerConnection.onicecandidate = (event) => {
             if (event.candidate && socket) {
                 socket.emit('signal', { signal: peerConnection.localDescription });
+            }
+        };
+        
+        // Handle ICE connection state changes
+        peerConnection.oniceconnectionstatechange = () => {
+            console.log('ICE connection state:', peerConnection.iceConnectionState);
+            const statusElement = document.getElementById('videoStatus');
+            
+            switch(peerConnection.iceConnectionState) {
+                case 'connected':
+                    statusElement.textContent = 'Verbonden!';
+                    statusElement.style.color = '#4CAF50';
+                    break;
+                case 'disconnected':
+                    statusElement.textContent = 'Verbinding verbroken';
+                    statusElement.style.color = '#ff6b35';
+                    break;
+                case 'failed':
+                    statusElement.textContent = 'Verbinding mislukt - probeer opnieuw';
+                    statusElement.style.color = '#f44336';
+                    showNotification('Verbinding mislukt. Probeer opnieuw.', 'error');
+                    break;
+                case 'checking':
+                    statusElement.textContent = 'Verbinding controleren...';
+                    statusElement.style.color = '#ff6b35';
+                    break;
             }
         };
         
