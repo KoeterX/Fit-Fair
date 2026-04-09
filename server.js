@@ -107,6 +107,17 @@ io.on('connection', (socket) => {
         }
     });
     
+    // Handle ICE candidates
+    socket.on('ice-candidate', (data) => {
+        const partnerSocket = activeConnections.get(socket);
+        if (partnerSocket) {
+            partnerSocket.emit('ice-candidate', {
+                candidate: data.candidate,
+                from: userId
+            });
+        }
+    });
+    
     // Handle skip/disconnect
     socket.on('skip', () => {
         console.log(`User ${userId} wants to skip`);

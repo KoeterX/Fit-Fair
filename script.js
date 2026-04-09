@@ -896,11 +896,13 @@ function initializeSocket() {
     
     // Handle group chat messages
     socket.on('group-chat-message', (message) => {
+        console.log('Received group message:', message);
         addGroupChatMessage(message.fromUsername, message.message, false);
     });
     
     // Handle group chat history
     socket.on('group-chat-history', (messages) => {
+        console.log('Received group chat history:', messages);
         messages.forEach(msg => {
             addGroupChatMessage(msg.fromUsername, msg.message, false);
         });
@@ -943,18 +945,26 @@ function initializeSocket() {
     
     // Handle WebRTC signaling
     socket.on('signal', async (data) => {
-        if (peerConnection) {
+        if (peerConnection && data.signal) {
             try {
+                console.log('Received signal:', data.signal.type);
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
                 
                 if (data.signal.type === 'offer') {
                     // Create and send answer
+                    console.log('Creating answer...');
                     const answer = await peerConnection.createAnswer();
                     await peerConnection.setLocalDescription(answer);
                     socket.emit('signal', { signal: answer });
+                    console.log('Sent answer');
                 }
             } catch (error) {
                 console.error('Error handling signal:', error);
+                if (error.message.includes('stable')) {
+                    console.log('Ignoring stable state error - connection might already be established');
+                } else {
+                    showNotification('Verbindingsfout: ' + error.message, 'error');
+                }
             }
         }
     });
@@ -1038,10 +1048,23 @@ async function createPeerConnection(isInitiator) {
         
         // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
-            if (event.candidate && socket) {
-                socket.emit('signal', { signal: peerConnection.localDescription });
+            if (event.candidate) {
+                console.log('Sending ICE candidate:', event.candidate);
+                socket.emit('ice-candidate', { candidate: event.candidate });
             }
         };
+        
+        // Handle incoming ICE candidates
+        socket.on('ice-candidate', async (data) => {
+            if (peerConnection && data.candidate) {
+                try {
+                    console.log('Received ICE candidate:', data.candidate);
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                } catch (error) {
+                    console.error('Error adding ICE candidate:', error);
+                }
+            }
+        });
         
         // Handle ICE connection state changes
         peerConnection.oniceconnectionstatechange = () => {
@@ -1074,6 +1097,7 @@ async function createPeerConnection(isInitiator) {
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
             socket.emit('signal', { signal: offer });
+            console.log('Sent offer:', offer.type);
         }
         
     } catch (error) {
@@ -1381,7 +1405,15 @@ function updateOnlineUsersList(users) {
     
     usersListElement.innerHTML = '';
     
+    if (users.length === 0) {
+        usersListElement.innerHTML = '<p style="color: #999; text-align: center;">Geen andere gebruikers online</p>';
+        return;
+    }
+    
     users.forEach(user => {
+        // Don't show current user in the list
+        if (user.userId === currentUserId) return;
+        
         const userDiv = document.createElement('div');
         userDiv.style.cssText = `
             padding: 8px;
@@ -1401,6 +1433,8 @@ function updateOnlineUsersList(users) {
         
         usersListElement.appendChild(userDiv);
     });
+    
+    console.log('Updated online users list with', users.length, 'users');
 }
 
 // Start private chat
@@ -1411,7 +1445,7 @@ function startPrivateChat(targetUserId, targetUsername) {
                 <div style="color: #999; text-align: center;">Private chat met ${targetUsername}</div>
             </div>
             <div class="chat-input" style="display: flex; gap: 10px; margin-top: 10px;">
-                <input type="text" id="privateChatInput" placeholder="Typ een bericht..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
+                <input type="text" id="privateChatInput" data-target-userid="${targetUserId}" placeholder="Typ een bericht..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
                 <button onclick="sendPrivateMessage('${targetUserId}')" style="background: #ff6b35; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Verstuur</button>
             </div>
         </div>
@@ -1425,6 +1459,8 @@ function sendPrivateMessage(targetUserId) {
     
     const message = input.value.trim();
     input.value = '';
+    
+    console.log('Sending private message to', targetUserId, ':', message);
     
     // Add to local chat
     addPrivateChatMessage(currentUsername, message, true);
@@ -1441,7 +1477,9 @@ function sendGroupMessage() {
     const message = input.value.trim();
     input.value = '';
     
-    // Add to local chat
+    console.log('Sending group message:', message, 'from:', currentUsername);
+    
+    // Add to local chat immediately
     addGroupChatMessage(currentUsername, message, true);
     
     // Send to server
@@ -1458,8 +1496,17 @@ function changeUsername() {
 
 // Handle Enter key in chat input
 document.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && e.target.id === 'chatInput') {
-        sendMessage();
+    if (e.key === 'Enter') {
+        if (e.target.id === 'chatInput') {
+            sendMessage();
+        } else if (e.target.id === 'groupChatInput') {
+            sendGroupMessage();
+        } else if (e.target.id === 'privateChatInput') {
+            const targetUserId = e.target.getAttribute('data-target-userid');
+            if (targetUserId) {
+                sendPrivateMessage(targetUserId);
+            }
+        }
     }
 });
 
