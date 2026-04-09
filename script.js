@@ -534,17 +534,1055 @@ function handleChatSelection(chatType) {
     const isRegistered = localStorage.getItem('knorrie_user_registered');
     
     if (!isRegistered) {
-        showNotification('Je moet eerst een account aanmaken om de chat te gebruiken.', 'info');
+        showNotification('Je moet eerst een account aanmaken om te chatten!', 'error');
+        
         // Scroll to registration form
         const registrationSection = document.getElementById('registratie');
-        const headerHeight = document.querySelector('header').offsetHeight;
-        const targetPosition = registrationSection.offsetTop - headerHeight - 20;
-        
-        window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
+        if (registrationSection) {
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const targetPosition = registrationSection.offsetTop - headerHeight - 20;
+            
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+            return;
+        }
+    }
+    
+    // Open chat based on type
+    switch(chatType) {
+        case 'Live Chat':
+            openVideoChatWindow();
+            break;
+        case 'Group Chat':
+            openGroupChatWindow();
+            break;
+        case 'Live Shows':
+            openLiveShowsWindow();
+            break;
+        case 'Text Chat':
+            openTextChatWindow();
+            break;
+        default:
+            showNotification('Chat type wordt geladen...', 'info');
+    }
+}
+
+function openVideoChatWindow() {
+    createChatModal('Random Video Chat', `
+        <div class="video-chat-container">
+            <div class="video-grid">
+                <div class="video-item">
+                    <h4>Jij</h4>
+                    <video id="localVideo" autoplay muted playsinline style="width: 100%; height: 240px; border-radius: 10px; background: #000; object-fit: cover;"></video>
+                </div>
+                <div class="video-item">
+                    <h4 id="remoteUserLabel">Wachten op verbinding...</h4>
+                    <video id="remoteVideo" autoplay playsinline style="width: 100%; height: 240px; border-radius: 10px; background: #000; object-fit: cover;"></video>
+                </div>
+            </div>
+            <div id="videoStatus" style="color: #ff6b35; margin: 10px 0; text-align: center;">Zoeken naar willekeurige gebruiker...</div>
+            <div class="chat-controls">
+                <button class="chat-btn" id="cameraBtn" onclick="toggleCamera()"> Camera</button>
+                <button class="chat-btn" id="micBtn" onclick="toggleMicrophone()"> Microfoon</button>
+                <button class="chat-btn skip-btn" onclick="skipUser()" id="skipBtn" disabled> Volgende </button>
+                <button class="chat-btn end-call" onclick="endCall()"> Stop </button>
+            </div>
+            <div class="chat-messages-container">
+                <div class="chat-messages" id="chatMessages" style="height: 150px; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px; margin-top: 10px;">
+                    <div style="color: #999; text-align: center;">Wachten op verbinding...</div>
+                </div>
+                <div class="chat-input" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="chatInput" placeholder="Typ een bericht..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
+                    <button onclick="sendMessage()" style="background: #ff6b35; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Verstuur</button>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    // Start P2P chat when modal opens
+    setTimeout(() => {
+        startP2PVideoChat();
+    }, 500);
+}
+
+function openGroupChatWindow() {
+    createChatModal('Group Chat - Alle Online Gebruikers', `
+        <div class="group-chat-container">
+            <div class="chat-header">
+                <h4>Group Chat (${onlineUsersCount} online)</h4>
+                <p>Chat met alle gebruikers op de server</p>
+            </div>
+            <div class="chat-messages" id="groupChatMessages" style="height: 300px; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px;">
+                <div style="color: #999; text-align: center;">Welkom in de group chat!</div>
+            </div>
+            <div class="chat-input" style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text" id="groupChatInput" placeholder="Typ een bericht naar iedereen..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
+                <button onclick="sendGroupMessage()" style="background: #ff6b35; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Verstuur</button>
+            </div>
+        </div>
+    `);
+    
+    // Request online users list when opening
+    if (socket) {
+        socket.emit('get-online-users');
+    }
+}
+
+function openLiveShowsWindow() {
+    createChatModal('Live Shows', `
+        <div class="live-shows-container">
+            <div class="show-grid">
+                <div class="show-item">
+                    <div class="show-thumbnail">🎬</div>
+                    <h4>Live Show 1</h4>
+                    <button class="watch-btn">Bekijken</button>
+                </div>
+                <div class="show-item">
+                    <div class="show-thumbnail">🎭</div>
+                    <h4>Live Show 2</h4>
+                    <button class="watch-btn">Bekijken</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function openTextChatWindow() {
+    createChatModal('Text Chat', `
+        <div class="text-chat-container">
+            <div class="online-users">
+                <h4>Online Gebruikers</h4>
+                <div class="user-list">
+                    <div class="user-item">🟢 User123</div>
+                    <div class="user-item">🟢 StarGazer</div>
+                    <div class="user-item">🟡 NightOwl</div>
+                </div>
+            </div>
+            <div class="chat-area">
+                <div class="chat-messages">
+                    <div class="message">Welcome to text chat!</div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" placeholder="Type your message..." />
+                    <button>Send</button>
+                </div>
+            </div>
+        </div>
+    `);
+}
+
+function createChatModal(title, content) {
+    // Remove existing modal
+    const existingModal = document.querySelector('.chat-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'chat-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>${title}</h3>
+                <button class="close-btn" onclick="closeChatModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                ${content}
+            </div>
+        </div>
+    `;
+    
+    // Add styles
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animate in
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 100);
+}
+
+function closeChatModal() {
+    const modal = document.querySelector('.chat-modal');
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+}
+
+// Subscription Management
+function initializeSubscriptionFeatures() {
+    // Add click handlers to subscription cards
+    const subscriptionCards = document.querySelectorAll('#abonnementen .tournament-card');
+    subscriptionCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const plan = this.querySelector('h3').textContent;
+            handleSubscriptionSelection(plan);
         });
+    });
+}
+
+function handleSubscriptionSelection(plan) {
+    // Scroll to registration form
+    const registrationSection = document.getElementById('registratie');
+    const headerHeight = document.querySelector('header').offsetHeight;
+    const targetPosition = registrationSection.offsetTop - headerHeight - 20;
+    
+    window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+    });
+    
+    // Pre-fill subscription field
+    setTimeout(() => {
+        const subscriptionSelect = document.getElementById('subscription');
+        if (subscriptionSelect) {
+            switch(plan) {
+                case 'Basic':
+                    subscriptionSelect.value = 'basic';
+                    break;
+                case 'Premium':
+                    subscriptionSelect.value = 'premium';
+                    break;
+                case 'VIP':
+                    subscriptionSelect.value = 'vip';
+                    break;
+            }
+            showNotification(`${plan} abonnement geselecteerd`, 'info');
+        }
+    }, 500);
+}
+
+// WebRTC P2P Video Chat Variables
+let localStream = null;
+let remoteStream = null;
+let peerConnection = null;
+let currentUserId = null;
+let currentUsername = null;
+let connectedUserId = null;
+let connectedUsername = null;
+let cameraEnabled = false;
+let microphoneEnabled = false;
+let isSearching = false;
+let socket = null;
+let onlineUsersCount = 0;
+
+// WebRTC Configuration
+const configuration = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
+
+// Initialize WebSocket connection
+function initializeSocket() {
+    // Connect to Socket.IO server
+    socket = io();
+    
+    // Receive user info
+    socket.on('user-info', (data) => {
+        currentUserId = data.userId;
+        currentUsername = data.username;
+        console.log('Received user info:', data);
+    });
+    
+    // Handle online users count
+    socket.on('online-users-count', (count) => {
+        onlineUsersCount = count;
+        updateOnlineUsersDisplay();
+    });
+    
+    // Handle username change
+    socket.on('username-changed', (newUsername) => {
+        currentUsername = newUsername;
+        showNotification(`Username gewijzigd naar: ${newUsername}`, 'success');
+    });
+    
+    // Handle group chat messages
+    socket.on('group-chat-message', (message) => {
+        addGroupChatMessage(message.fromUsername, message.message, false);
+    });
+    
+    // Handle group chat history
+    socket.on('group-chat-history', (messages) => {
+        messages.forEach(msg => {
+            addGroupChatMessage(msg.fromUsername, msg.message, false);
+        });
+    });
+    
+    // Handle private chat messages
+    socket.on('private-chat-message', (message) => {
+        addPrivateChatMessage(message.fromUsername, message.message, false);
+    });
+    
+    // Handle online users list
+    socket.on('online-users-list', (users) => {
+        updateOnlineUsersList(users);
+    });
+    
+    // Handle partner found
+    socket.on('partner-found', async (data) => {
+        connectedUserId = data.partnerId;
+        connectedUsername = data.partnerUsername;
+        isSearching = false;
+        
+        const statusElement = document.getElementById('videoStatus');
+        const remoteUserLabel = document.getElementById('remoteUserLabel');
+        const skipBtn = document.getElementById('skipBtn');
+        
+        if (data.isInitiator) {
+            // Create peer connection as initiator
+            await createPeerConnection(true);
+            statusElement.textContent = 'Verbinding maken met ' + connectedUsername + '...';
+        } else {
+            // Create peer connection as receiver
+            await createPeerConnection(false);
+            statusElement.textContent = 'Verbinding ontvangen van ' + connectedUsername + '...';
+        }
+        
+        remoteUserLabel.textContent = connectedUsername;
+        showNotification(`Verbonden met ${connectedUsername}!`, 'success');
+    });
+    
+    // Handle WebRTC signaling
+    socket.on('signal', async (data) => {
+        if (peerConnection) {
+            try {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.signal));
+                
+                if (data.signal.type === 'offer') {
+                    // Create and send answer
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    socket.emit('signal', { signal: answer });
+                }
+            } catch (error) {
+                console.error('Error handling signal:', error);
+            }
+        }
+    });
+    
+    // Handle searching state
+    socket.on('searching', () => {
+        const statusElement = document.getElementById('videoStatus');
+        const remoteUserLabel = document.getElementById('remoteUserLabel');
+        const skipBtn = document.getElementById('skipBtn');
+        
+        isSearching = true;
+        connectedUserId = null;
+        
+        statusElement.textContent = 'Zoeken naar willekeurige gebruiker...';
+        statusElement.style.color = '#ff6b35';
+        remoteUserLabel.textContent = 'Wachten op verbinding...';
+        skipBtn.disabled = true;
+        skipBtn.style.background = '#666';
+        
+        // Clear remote video
+        const remoteVideo = document.getElementById('remoteVideo');
+        if (remoteVideo) {
+            remoteVideo.srcObject = null;
+        }
+        
+        addSystemMessage('Zoeken naar nieuwe gebruiker...');
+    });
+    
+    // Handle partner skipped
+    socket.on('partner-skipped', () => {
+        addSystemMessage('Gebruiker heeft geskipt');
+        socket.emit('find-partner');
+    });
+    
+    // Handle partner disconnected
+    socket.on('partner-disconnected', () => {
+        addSystemMessage('Gebruiker is offline gegaan');
+        socket.emit('find-partner');
+    });
+    
+    // Handle chat messages
+    socket.on('chat-message', (data) => {
+        addChatMessage(data.fromUsername, data.message, false);
+    });
+}
+
+// Create WebRTC peer connection
+async function createPeerConnection(isInitiator) {
+    const remoteVideo = document.getElementById('remoteVideo');
+    const statusElement = document.getElementById('videoStatus');
+    const skipBtn = document.getElementById('skipBtn');
+    
+    try {
+        // Close existing connection
+        if (peerConnection) {
+            peerConnection.close();
+        }
+        
+        // Create new peer connection
+        peerConnection = new RTCPeerConnection(configuration);
+        
+        // Add local stream
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+        
+        // Handle remote stream
+        peerConnection.ontrack = (event) => {
+            const [stream] = event.streams;
+            remoteVideo.srcObject = stream;
+            
+            // Connection established
+            statusElement.textContent = 'Verbonden met ' + connectedUsername + '!';
+            statusElement.style.color = '#4CAF50';
+            skipBtn.disabled = false;
+            skipBtn.style.background = '#ff6b35';
+            
+            showNotification('Verbonden met ' + connectedUsername + '!', 'success');
+            addSystemMessage('Verbonden met ' + connectedUsername);
+        };
+        
+        // Handle ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate && socket) {
+                socket.emit('signal', { signal: peerConnection.localDescription });
+            }
+        };
+        
+        if (isInitiator) {
+            // Create and send offer
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            socket.emit('signal', { signal: offer });
+        }
+        
+    } catch (error) {
+        console.error('Error creating peer connection:', error);
+        statusElement.textContent = 'Verbinding mislukt';
+        statusElement.style.color = '#f44336';
+    }
+}
+
+// Start P2P video chat
+async function startP2PVideoChat() {
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const statusElement = document.getElementById('videoStatus');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const micBtn = document.getElementById('micBtn');
+    
+    if (!localVideo || !remoteVideo) return;
+    
+    try {
+        statusElement.textContent = 'Camera en microfoon starten...';
+        
+        // Get user media
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: 'user'
+            }, 
+            audio: true 
+        });
+        
+        localStream = stream;
+        localVideo.srcObject = stream;
+        
+        cameraEnabled = true;
+        microphoneEnabled = true;
+        
+        // Update button states
+        cameraBtn.textContent = 'Camera UIT';
+        cameraBtn.style.background = '#ff6b35';
+        micBtn.textContent = 'Microfoon UIT';
+        micBtn.style.background = '#ff6b35';
+        
+        // Initialize WebSocket connection
+        initializeSocket();
+        
+        // Start searching for partner
+        setTimeout(() => {
+            if (socket) {
+                socket.emit('find-partner');
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error accessing media devices:', error);
+        statusElement.textContent = 'Geen toegang tot camera/microfoon';
+        statusElement.style.color = '#f44336';
+        
+        if (error.name === 'NotAllowedError') {
+            showNotification('Geef toegang tot camera en microfoon', 'error');
+        } else {
+            showNotification('Fout bij starten video chat', 'error');
+        }
+    }
+}
+
+// Toggle camera on/off
+function toggleCamera() {
+    if (!localStream) {
+        showNotification('Start eerst de video chat', 'info');
         return;
     }
     
-    // Simu
+    const videoTrack = localStream.getVideoTracks()[0];
+    const cameraBtn = document.getElementById('cameraBtn');
+    
+    if (videoTrack) {
+        cameraEnabled = !cameraEnabled;
+        videoTrack.enabled = cameraEnabled;
+        
+        if (cameraEnabled) {
+            cameraBtn.textContent = 'Camera UIT';
+            cameraBtn.style.background = '#ff6b35';
+            showNotification('Camera ingeschakeld', 'info');
+        } else {
+            cameraBtn.textContent = 'Camera AAN';
+            cameraBtn.style.background = '#666';
+            showNotification('Camera uitgeschakeld', 'info');
+        }
+    }
+}
+
+// Toggle microphone on/off
+function toggleMicrophone() {
+    if (!localStream) {
+        showNotification('Start eerst de video chat', 'info');
+        return;
+    }
+    
+    const audioTrack = localStream.getAudioTracks()[0];
+    const micBtn = document.getElementById('micBtn');
+    
+    if (audioTrack) {
+        microphoneEnabled = !microphoneEnabled;
+        audioTrack.enabled = microphoneEnabled;
+        
+        if (microphoneEnabled) {
+            micBtn.textContent = 'Microfoon UIT';
+            micBtn.style.background = '#ff6b35';
+            showNotification('Microfoon ingeschakeld', 'info');
+        } else {
+            micBtn.textContent = 'Microfoon AAN';
+            micBtn.style.background = '#666';
+            showNotification('Microfoon uitgeschakeld', 'info');
+        }
+    }
+}
+
+// Skip to next user
+function skipUser() {
+    if (!socket || !connectedUserId) {
+        showNotification('Geen actieve verbinding om te skippen', 'info');
+        return;
+    }
+    
+    addSystemMessage('Gebruiker geskipt, zoeken naar nieuwe...');
+    
+    // Close current connection
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+    
+    // Clear remote video
+    const remoteVideo = document.getElementById('remoteVideo');
+    if (remoteVideo) {
+        remoteVideo.srcObject = null;
+    }
+    
+    // Reset UI
+    const statusElement = document.getElementById('videoStatus');
+    const remoteUserLabel = document.getElementById('remoteUserLabel');
+    const skipBtn = document.getElementById('skipBtn');
+    
+    connectedUserId = null;
+    skipBtn.disabled = true;
+    skipBtn.style.background = '#666';
+    
+    statusElement.textContent = 'Zoeken naar nieuwe gebruiker...';
+    statusElement.style.color = '#ff6b35';
+    remoteUserLabel.textContent = 'Wachten op verbinding...';
+    
+    // Tell server to skip and find new partner
+    socket.emit('skip');
+    
+    showNotification('Nieuwe gebruiker zoeken...', 'info');
+}
+
+// Send chat message
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    if (!input || !input.value.trim() || !socket || !connectedUserId) return;
+    
+    const message = input.value.trim();
+    input.value = '';
+    
+    // Add message to local chat
+    addChatMessage('Jij', message, true);
+    
+    // Send to server
+    socket.emit('chat-message', message);
+}
+
+// Add chat message to UI
+function addChatMessage(sender, message, isLocal) {
+    const messagesContainer = document.getElementById('chatMessages');
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        background: ${isLocal ? '#ff6b35' : '#333'};
+        color: white;
+        max-width: 80%;
+        ${isLocal ? 'margin-left: auto; text-align: right;' : 'margin-right: auto;'}
+    `;
+    
+    messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Add system message
+function addSystemMessage(message) {
+    const messagesContainer = document.getElementById('chatMessages');
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        background: #1a1a1a;
+        color: #999;
+        text-align: center;
+        font-style: italic;
+        font-size: 0.9em;
+    `;
+    
+    messageDiv.textContent = message;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Update online users display
+function updateOnlineUsersDisplay() {
+    const onlineCountElement = document.getElementById('onlineCount');
+    if (onlineCountElement) {
+        onlineCountElement.textContent = onlineUsersCount;
+    }
+    
+    // Update in leden section
+    const ledenCountElement = document.querySelector('.stat-number');
+    if (ledenCountElement) {
+        ledenCountElement.textContent = onlineUsersCount;
+    }
+}
+
+// Add group chat message
+function addGroupChatMessage(sender, message, isLocal) {
+    const messagesContainer = document.getElementById('groupChatMessages');
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        background: ${isLocal ? '#ff6b35' : '#333'};
+        color: white;
+        max-width: 80%;
+        ${isLocal ? 'margin-left: auto; text-align: right;' : 'margin-right: auto;'}
+    `;
+    
+    const time = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    messageDiv.innerHTML = `<strong>${sender}</strong> <small style="opacity: 0.7">${time}</small><br>${message}`;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Add private chat message
+function addPrivateChatMessage(sender, message, isLocal) {
+    const messagesContainer = document.getElementById('privateChatMessages');
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 8px;
+        background: ${isLocal ? '#ff6b35' : '#333'};
+        color: white;
+        max-width: 80%;
+        ${isLocal ? 'margin-left: auto; text-align: right;' : 'margin-right: auto;'}
+    `;
+    
+    const time = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    messageDiv.innerHTML = `<strong>${sender}</strong> <small style="opacity: 0.7">${time}</small><br>${message}`;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Update online users list
+function updateOnlineUsersList(users) {
+    const usersListElement = document.getElementById('onlineUsersList');
+    if (!usersListElement) return;
+    
+    usersListElement.innerHTML = '';
+    
+    users.forEach(user => {
+        const userDiv = document.createElement('div');
+        userDiv.style.cssText = `
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        `;
+        
+        userDiv.innerHTML = `
+            <span>${user.username}</span>
+            <button onclick="startPrivateChat('${user.userId}', '${user.username}')" style="background: #ff6b35; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Chat</button>
+        `;
+        
+        usersListElement.appendChild(userDiv);
+    });
+}
+
+// Start private chat
+function startPrivateChat(targetUserId, targetUsername) {
+    createChatModal(`Private Chat - ${targetUsername}`, `
+        <div class="private-chat-container">
+            <div class="chat-messages" id="privateChatMessages" style="height: 300px; overflow-y: auto; background: #1a1a1a; border-radius: 10px; padding: 10px;">
+                <div style="color: #999; text-align: center;">Private chat met ${targetUsername}</div>
+            </div>
+            <div class="chat-input" style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text" id="privateChatInput" placeholder="Typ een bericht..." style="flex: 1; padding: 8px; border: 1px solid #333; border-radius: 5px; background: #000; color: white;" />
+                <button onclick="sendPrivateMessage('${targetUserId}')" style="background: #ff6b35; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Verstuur</button>
+            </div>
+        </div>
+    `);
+}
+
+// Send private message
+function sendPrivateMessage(targetUserId) {
+    const input = document.getElementById('privateChatInput');
+    if (!input || !input.value.trim() || !socket) return;
+    
+    const message = input.value.trim();
+    input.value = '';
+    
+    // Add to local chat
+    addPrivateChatMessage(currentUsername, message, true);
+    
+    // Send to server
+    socket.emit('private-chat-message', { targetUserId, message });
+}
+
+// Send group chat message
+function sendGroupMessage() {
+    const input = document.getElementById('groupChatInput');
+    if (!input || !input.value.trim() || !socket) return;
+    
+    const message = input.value.trim();
+    input.value = '';
+    
+    // Add to local chat
+    addGroupChatMessage(currentUsername, message, true);
+    
+    // Send to server
+    socket.emit('group-chat-message', message);
+}
+
+// Change username
+function changeUsername() {
+    const newUsername = prompt('Voer nieuwe username in (max 20 tekens):', currentUsername);
+    if (newUsername && socket) {
+        socket.emit('change-username', newUsername);
+    }
+}
+
+// Handle Enter key in chat input
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && e.target.id === 'chatInput') {
+        sendMessage();
+    }
+});
+
+// End video call
+function endCall() {
+    // Disconnect from server
+    if (socket) {
+        socket.disconnect();
+        socket = null;
+    }
+    
+    // Close peer connection
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+    
+    // Stop local stream
+    if (localStream) {
+        localStream.getTracks().forEach(track => {
+            track.stop();
+        });
+        localStream = null;
+    }
+    
+    // Reset variables
+    connectedUserId = null;
+    currentUserId = null;
+    cameraEnabled = false;
+    microphoneEnabled = false;
+    isSearching = false;
+    
+    closeChatModal();
+    showNotification('Video chat beëindigd', 'info');
+}
+
+function sendGroupMessage() {
+    const input = document.getElementById('groupChatInput');
+    if (input && input.value.trim()) {
+        const messagesContainer = document.querySelector('.chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        messageDiv.innerHTML = `<strong>Je:</strong> ${input.value}`;
+        messagesContainer.appendChild(messageDiv);
+        input.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+// Add CSS for chat modal
+const chatModalStyles = `
+    .chat-modal {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .modal-content {
+        background: #1a1a1a;
+        border-radius: 15px;
+        border: 2px solid #ff6b35;
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #333;
+    }
+    
+    .modal-header h3 {
+        color: #ffffff;
+        margin: 0;
+    }
+    
+    .close-btn {
+        background: none;
+        border: none;
+        color: #ff6b35;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    
+    .video-chat-container {
+        text-align: center;
+    }
+    
+    .video-placeholder {
+        background: #000;
+        border-radius: 10px;
+        padding: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .camera-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #333;
+        border-top: 3px solid #ff6b35;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .chat-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .chat-btn {
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .chat-btn:hover {
+        background: #ff8555;
+        transform: translateY(-2px);
+    }
+    
+    .end-call {
+        background: #f44336;
+    }
+    
+    .end-call:hover {
+        background: #da190b;
+    }
+    
+    .group-chat-container, .text-chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 400px;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        background: #000;
+        border-radius: 10px;
+        padding: 15px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+    }
+    
+    .message {
+        color: #ffffff;
+        margin-bottom: 10px;
+        padding: 8px;
+        background: #333;
+        border-radius: 5px;
+    }
+    
+    .chat-input-container, .chat-input {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .chat-input input, .chat-input-container input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #333;
+        border-radius: 5px;
+        background: #000;
+        color: white;
+    }
+    
+    .chat-input button, .chat-input-container button {
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .live-shows-container {
+        text-align: center;
+    }
+    
+    .show-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .show-item {
+        background: #333;
+        padding: 20px;
+        border-radius: 10px;
+    }
+    
+    .show-thumbnail {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+    
+    .watch-btn {
+        background: #ff6b35;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .online-users {
+        background: #333;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .online-users h4 {
+        color: #ff6b35;
+        margin-top: 0;
+    }
+    
+    .user-list {
+        color: #ffffff;
+    }
+    
+    .user-item {
+        padding: 5px 0;
+    }
+`;
+
+// Inject styles
+const styleSheet = document.createElement('style');
+styleSheet.textContent = chatModalStyles;
+document.head.appendChild(styleSheet);
