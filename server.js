@@ -16,9 +16,12 @@ const io = socketIo(server, {
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// Store waiting users and active connections
+// Store users and connections
 const waitingUsers = new Set();
 const activeConnections = new Map();
+const onlineUsers = new Map(); // userId -> {socket, username, joinedAt}
+const groupChatMessages = [];
+const privateChats = new Map(); // userId -> Map<targetUserId, messages>
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -28,8 +31,24 @@ io.on('connection', (socket) => {
     const userId = 'user_' + Math.random().toString(36).substr(2, 9);
     socket.userId = userId;
     
-    // Send user ID to client
-    socket.emit('user-id', userId);
+    // Add to online users
+    onlineUsers.set(userId, {
+        socket: socket,
+        username: `User_${userId.substr(5, 4)}`,
+        joinedAt: new Date()
+    });
+    
+    // Send user ID and username to client
+    socket.emit('user-info', { 
+        userId: userId, 
+        username: onlineUsers.get(userId).username 
+    });
+    
+    // Send online users count
+    io.emit('online-users-count', onlineUsers.size);
+    
+    // Send recent group chat messages
+    socket.emit('group-chat-history', groupChatMessages.slice(-50));
     
     // Handle user looking for partner
     socket.on('find-partner', () => {
@@ -53,9 +72,20 @@ io.on('connection', (socket) => {
             activeConnections.set(socket, partnerSocket);
             activeConnections.set(partnerSocket, socket);
             
-            // Notify both users
-            socket.emit('partner-found', { partnerId: partnerId, isInitiator: true });
-            partnerSocket.emit('partner-found', { partnerId: userId, isInitiator: false });
+            // Notify both users with usernames
+            const user1Info = onlineUsers.get(userId);
+            const user2Info = onlineUsers.get(partnerId);
+            
+            socket.emit('partner-found', { 
+                partnerId: partnerId, 
+                partnerUsername: user2Info.username,
+                isInitiator: true 
+            });
+            partnerSocket.emit('partner-found', { 
+                partnerId: userId, 
+                partnerUsername: user1Info.username,
+                isInitiator: false 
+            });
             
             console.log(`Matched: ${userId} <-> ${partnerId}`);
         } else {
@@ -104,6 +134,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('User disconnected:', userId);
         
+        // Remove from online users
+        onlineUsers.delete(userId);
+        
         // Remove from waiting list
         waitingUsers.delete(socket);
         
@@ -121,17 +154,101 @@ io.on('connection', (socket) => {
         
         // Clean up
         activeConnections.delete(socket);
+        privateChats.delete(userId);
+        
+        // Update online users count
+        io.emit('online-users-count', onlineUsers.size);
     });
     
     // Handle chat messages
     socket.on('chat-message', (message) => {
         const partnerSocket = activeConnections.get(socket);
         if (partnerSocket) {
+            const userInfo = onlineUsers.get(userId);
             partnerSocket.emit('chat-message', {
                 message: message,
-                from: userId
+                from: userId,
+                fromUsername: userInfo.username
             });
         }
+    });
+    
+    // Handle group chat messages
+    socket.on('group-chat-message', (message) => {
+        const userInfo = onlineUsers.get(userId);
+        const chatMessage = {
+            id: Date.now(),
+            message: message,
+            from: userId,
+            fromUsername: userInfo.username,
+            timestamp: new Date()
+        };
+        
+        // Add to history
+        groupChatMessages.push(chatMessage);
+        
+        // Keep only last 100 messages
+        if (groupChatMessages.length > 100) {
+            groupChatMessages.shift();
+        }
+        
+        // Broadcast to all online users
+        io.emit('group-chat-message', chatMessage);
+    });
+    
+    // Handle private chat messages
+    socket.on('private-chat-message', ({ targetUserId, message }) => {
+        const targetUser = onlineUsers.get(targetUserId);
+        const userInfo = onlineUsers.get(userId);
+        
+        if (targetUser && userInfo) {
+            const chatMessage = {
+                id: Date.now(),
+                message: message,
+                from: userId,
+                fromUsername: userInfo.username,
+                timestamp: new Date()
+            };
+            
+            // Send to target user
+            targetUser.socket.emit('private-chat-message', chatMessage);
+            
+            // Send copy to sender
+            socket.emit('private-chat-message', chatMessage);
+            
+            // Store in private chat history
+            if (!privateChats.has(userId)) {
+                privateChats.set(userId, new Map());
+            }
+            if (!privateChats.has(targetUserId)) {
+                privateChats.set(targetUserId, new Map());
+            }
+            
+            privateChats.get(userId).set(targetUserId, chatMessage);
+            privateChats.get(targetUserId).set(userId, chatMessage);
+        }
+    });
+    
+    // Handle username change
+    socket.on('change-username', (newUsername) => {
+        if (newUsername && newUsername.trim().length > 0 && newUsername.length <= 20) {
+            const userInfo = onlineUsers.get(userId);
+            userInfo.username = newUsername.trim();
+            
+            // Broadcast username change
+            socket.emit('username-changed', newUsername);
+            io.emit('online-users-count', onlineUsers.size);
+        }
+    });
+    
+    // Handle get online users list
+    socket.on('get-online-users', () => {
+        const usersList = Array.from(onlineUsers.entries()).map(([id, info]) => ({
+            userId: id,
+            username: info.username,
+            joinedAt: info.joinedAt
+        }));
+        socket.emit('online-users-list', usersList);
     });
 });
 
